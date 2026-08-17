@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ארנט | קופה, מלאי ודוחות</title>
+<style>
+  :root{
+    --bg:#F4F5F3; --surface:#FFFFFF; --surface-2:#EDEFEA;
+    --ink:#16211C; --ink-soft:#5B655E; --line:#DBDED6;
+    --teal:#0F5C48; --teal-deep:#0A3F32; --teal-tint:#E1F0EA;
+    --amber:#B4680B; --amber-tint:#FBEBD6;
+    --red:#B23A2E; --red-tint:#FBE7E4;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:Arial,Heebo,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+  #app{display:flex;min-height:100vh;}
+  #sidebar{width:200px;flex-shrink:0;background:var(--teal-deep);color:#EAF3EF;display:flex;flex-direction:column;padding:20px 14px;}
+  #brand{font-weight:800;font-size:22px;padding:0 8px 20px;border-bottom:1px solid rgba(255,255,255,.14);margin-bottom:16px;}
+  #brand span{display:block;font-size:11px;font-weight:400;color:#9FC3B6;margin-top:2px;}
+  .nav-btn{display:block;width:100%;text-align:right;background:transparent;border:none;color:#CFE4DB;font-family:inherit;font-size:15px;font-weight:500;padding:11px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;}
+  .nav-btn:hover{background:rgba(255,255,255,.08);}
+  .nav-btn.active{background:#EAF3EF;color:var(--teal-deep);}
+  #main{flex:1;padding:26px 30px 60px;max-width:1200px;}
+  .view{display:none;} .view.active{display:block;}
+  h1{font-size:20px;margin:0 0 4px;} .sub{color:var(--ink-soft);font-size:13px;margin:0 0 20px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;}
+  .grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start;}
+  input,select{font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:7px;padding:9px 12px;background:var(--surface);color:var(--ink);width:100%;}
+  input:focus,select:focus{outline:none;border-color:var(--teal);}
+  button{cursor:pointer;font-family:inherit;}
+  .primary{background:var(--teal);color:#fff;border:none;border-radius:7px;padding:9px 18px;font-weight:600;font-size:14px;}
+  .primary:hover{background:var(--teal-deep);}
+  .primary:disabled{opacity:.5;cursor:not-allowed;}
+  .ghost{background:transparent;border:1px solid var(--line);border-radius:7px;padding:8px 14px;font-size:13px;color:var(--ink);}
+  .ghost:hover{border-color:var(--teal);color:var(--teal);}
+  .danger-link{background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;}
+  .link{background:none;border:none;color:var(--teal);cursor:pointer;font-size:13px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:right;font-size:11px;color:var(--ink-soft);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);}
+  td{padding:9px 8px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .num{font-family:monospace;}
+  .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px;max-height:340px;overflow-y:auto;}
+  .product-tile{border:1px solid var(--line);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;font-size:12.5px;}
+  .product-tile:hover{border-color:var(--teal);background:var(--teal-tint);}
+  .product-tile.low{background:var(--amber-tint);} .product-tile.out{background:var(--red-tint);opacity:.7;cursor:not-allowed;}
+  .cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+  .total{font-family:monospace;font-size:24px;font-weight:700;color:var(--teal-deep);}
+  .modal-back{position:fixed;inset:0;background:rgba(10,20,16,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;}
+  .modal{background:#fff;border-radius:12px;padding:22px;width:380px;max-width:100%;max-height:88vh;overflow-y:auto;}
+  .modal h3{margin:0 0 14px;font-size:16px;}
+  .field{margin-bottom:12px;} .field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px;}
+  .field-row{display:flex;gap:10px;} .field-row .field{flex:1;}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+  .err{color:var(--red);font-size:12px;display:none;margin-bottom:8px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
+  .stat-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+  .stat-card .l{font-size:12px;color:var(--ink-soft);} .stat-card .v{font-family:monospace;font-size:20px;font-weight:700;margin-top:4px;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--teal-deep);color:#EAF3EF;padding:10px 20px;border-radius:8px;font-size:13px;z-index:99;}
+  .empty{color:var(--ink-soft);font-size:13px;padding:16px 0;text-align:center;}
+  .status-pill{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+  .status-pill.voided{background:var(--red-tint);color:var(--red);}
+  .status-pill.ok{background:var(--teal-tint);color:var(--teal);}
+  .status-pill.partial_refund{background:var(--amber-tint);color:var(--amber);}
+  .pay-line{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <div id="brand">ארנט<span>קופה · מלאי · דוחות</span></div>
+    <button class="nav-btn active" data-view="pos">קופה</button>
+    <button class="nav-btn" data-view="inv">מלאי</button>
+    <button class="nav-btn" data-view="rep">דוחות</button>
+    <button class="nav-btn" data-view="set">הגדרות</button>
+  </div>
+  <div id="main">
+
+    <div class="view active" id="view-pos">
+      <h1>עמדת קופה</h1>
+      <p class="sub">סרקו ברקוד, הקלידו שם מוצר, או לחצו על מוצר בגריד</p>
+      <div class="grid2">
+        <div class="card">
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <input id="scan-input" placeholder="הקלד שם מוצר או סרוק ברקוד..." autofocus>
+            <button class="primary" id="scan-add">הוסף</button>
+          </div>
+          <button class="link" id="manual-add-btn">+ גביית סכום חופשי (ללא מוצר / ברקוד)</button>
+          <div id="product-grid" class="product-grid"></div>
+        </div>
+        <div class="card">
+          <div id="cart-wrap"><div class="empty">הסל ריק — הוסיפו מוצר כדי להתחיל מכירה</div></div>
+          <div class="cart-total-row" id="cart-total-row" style="display:none;">
+            <span style="font-size:13px;color:var(--ink-soft);">סה"כ בסל</span>
+            <span class="total" id="cart-total">₪0.00</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="primary" id="checkout-btn" style="flex:1;">הוצאת חשבונית / תשלום</button>
+            <button class="ghost" id="clear-cart-btn">נקה סל</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-inv">
+      <h1>ניהול מלאי</h1>
+      <p class="sub">כל המוצרים בחנות</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input id="inv-search" placeholder="חיפוש מוצר...">
+        <button class="primary" id="inv-new-btn" style="white-space:nowrap;">+ מוצר חדש</button>
+      </div>
+      <div class="card" style="padding:0;">
+        <table><thead><tr><th>שם</th><th>ברקוד</th><th>מחיר</th><th>עלות</th><th>מלאי</th><th>סף נמוך</th><th>קטגוריה</th><th></th></tr></thead>
+        <tbody id="inv-body"></tbody></table>
+      </div>
+    </div>
+
+    <div class="view" id="view-rep">
+      <h1>דוחות</h1>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="l">מכירות היום (נטו)</div><div class="v" id="rep-total">₪0.00</div></div>
+        <div class="stat-card"><div class="l">עסקאות היום</div><div class="v" id="rep-count">0</div></div>
+        <div class="stat-card"><div class="l">מוצרים במלאי נמוך</div><div class="v" id="rep-low-count">0</div></div>
+      </div>
+      <h3 style="font-size:14px;">התראות מלאי נמוך</h3>
+      <div class="card" style="padding:0;margin-bottom:22px;">
+        <table><thead><tr><th>מוצר</th><th>כמות</th><th>סף</th></tr></thead><tbody id="rep-low-body"></tbody></table>
+      </div>
+      <h3 style="font-size:14px;">מכירות אחרונות</h3>
+      <div class="card" style="padding:0;">
+        <table><thead><tr><th>מס'</th><th>שעה</th><th>סוג</th><th>סכום</th><th>סטטוס</th><th></th></tr></thead><tbody id="rep-sales-body"></tbody></table>
+      </div>
+    </div>
+
+    <div class="view" id="view-set">
+      <h1>הגדרות עסק</h1>
+      <div class="card" style="max-width:400px;">
+        <div class="field"><label>שם העסק</label><input id="s-name"></div>
+        <div class="field"><label>אחוז מע"מ</label><input id="s-vat" type="number" step="0.1"></div>
+        <div class="err" id="s-err"></div>
+        <button class="primary" id="s-save">שמירת הגדרות</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="modal-root"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+function fmt(n){ return '₪' + Number(n||0).toLocaleString('he-IL',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
+async function api(path, opts={}){
+  const res = await fetch(path, { headers:{'Content-Type':'application/json'}, ...opts });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok){ throw new Error(data.error || 'שגיאת שרת'); }
+  return data;
+}
+
+let cart = [];  // {product_id, name, price, qty}
+
+// ---- ניווט ----
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    $('view-'+btn.dataset.view).classList.add('active');
+    if(btn.dataset.view==='inv') loadInventory();
+    if(btn.dataset.view==='rep') loadReports();
+    if(btn.dataset.view==='set') loadSettings();
+    if(btn.dataset.view==='pos') { loadProductGrid(); $('scan-input').focus(); }
+  });
+});
+
+// ---- POS: גריד מוצרים + חיפוש/ברקוד ----
+async function loadProductGrid(q=''){
+  const products = await api('/api/products?q=' + encodeURIComponent(q));
+  const grid = $('product-grid');
+  grid.innerHTML = '';
+  products.forEach(p=>{
+    const cls = p.qty <= 0 ? 'out' : (p.qty <= p.min_qty ? 'low' : '');
+    const tile = document.createElement('div');
+    tile.className = 'product-tile ' + cls;
+    tile.innerHTML = `<div>${esc(p.name)}</div><div style="color:var(--ink-soft);margin-top:4px;">${fmt(p.price)} · ${p.qty}</div>`;
+    if(p.qty > 0) tile.addEventListener('click', ()=> addToCart(p));
+    grid.appendChild(tile);
+  });
+}
+
+const scanInput = $('scan-input');
+let scanTimer = null;
+scanInput.addEventListener('input', ()=>{
+  clearTimeout(scanTimer);
+  scanTimer = setTimeout(()=> loadProductGrid(scanInput.value), 150);
+});
+scanInput.addEventListener('keydown', async (e)=>{
+  if(e.key !== 'Enter') return;
+  const q = scanInput.value.trim();
+  if(!q) return;
+  try{
+    const p = await api('/api/products/barcode/' + encodeURIComponent(q));
+    addToCart(p);
+  }catch(err){
+    const matches = await api('/api/products?q=' + encodeURIComponent(q));
+    if(matches.length === 1) addToCart(matches[0]);
+    else toast('לא נמצא מוצר תואם');
+  }
+});
+$('scan-add').addEventListener('click', ()=> scanInput.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter'})));
+
+document.addEventListener('keydown', (e)=>{
+  if(!$('view-pos').classList.contains('active')) return;
+  if(document.querySelector('.modal-back')) return;
+  const tag = document.activeElement.tagName;
+  if(tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA' && e.key.length === 1) scanInput.focus();
+});
+
+function addToCart(product){
+  const line = cart.find(l => l.product_id === product.id);
+  const inCart = line ? line.qty : 0;
+  if(inCart + 1 > product.qty){ toast('אין מספיק מלאי זמין'); return; }
+  if(line) line.qty += 1;
+  else cart.push({ product_id: product.id, name: product.name, price: product.price, qty: 1 });
+  scanInput.value = '';
+  loadProductGrid();
+  renderCart();
+  scanInput.focus();
+}
+
+function renderCart(){
+  const wrap = $('cart-wrap');
+  const totalRow = $('cart-total-row');
+  if(cart.length === 0){
+    wrap.innerHTML = '<div class="empty">הסל ריק — הוסיפו מוצר כדי להתחיל מכירה</div>';
+    totalRow.style.display = 'none';
+    return;
+  }
+  totalRow.style.display = 'flex';
+  let total = 0, rows = '';
+  cart.forEach((l,idx)=>{
+    total += l.price * l.qty;
+    rows += `<tr>
+      <td>${esc(l.name)}</td><td class="num">${fmt(l.price)}</td>
+      <td><button class="ghost" data-act="minus" data-idx="${idx}" style="padding:2px 8px;">−</button> ${l.qty} <button class="ghost" data-act="plus" data-idx="${idx}" style="padding:2px 8px;">+</button></td>
+      <td class="num">${fmt(l.price*l.qty)}</td></tr>`;
+  });
+  wrap.innerHTML = `<table><thead><tr><th>פריט</th><th>מחיר</th><th>כמות</th><th>סה"כ</th></tr></thead><tbody>${rows}</tbody></table>`;
+  $('cart-total').textContent = fmt(total);
+  wrap.querySelectorAll('button[data-act]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = +b.dataset.idx;
+      cart[idx].qty += b.dataset.act==='plus' ? 1 : -1;
+      if(cart[idx].qty <= 0) cart.splice(idx,1);
+      renderCart();
+    });
+  });
+}
+
+$('clear-cart-btn').addEventListener('click', ()=>{ if(cart.length && !confirm('לנקות את הסל?')) return; cart=[]; renderCart(); });
+
+$('manual-add-btn').addEventListener('click', ()=>{
+  openModal(`
+    <h3>גביית סכום חופשי</h3>
+    <div class="field"><label>תיאור</label><input id="mi-desc" value="תשלום כללי"></div>
+    <div class="field"><label>סכום (₪)</label><input id="mi-price" type="number" step="0.01"></div>
+    <div class="err" id="mi-err"></div>
+    <div class="modal-actions">
+      <button class="primary" id="mi-add">הוספה לסל</button>
+      <button class="ghost" id="mi-cancel">ביטול</button>
+    </div>`);
+  $('mi-cancel').addEventListener('click', closeModal);
+  $('mi-add').addEventListener('click', ()=>{
+    const price = parseFloat($('mi-price').value);
+    if(isNaN(price) || price <= 0){ $('mi-err').textContent='יש להזין סכום תקין'; $('mi-err').style.display='block'; return; }
+    cart.push({ product_id: null, name: $('mi-desc').value.trim() || 'תשלום כללי', price, qty: 1 });
+    renderCart();
+    closeModal();
+  });
+});
+
+// ---- מודל גנרי ----
+function openModal(html){
+  const root = $('modal-root');
+  const back = document.createElement('div');
+  back.className = 'modal-back';
+  back.innerHTML = `<div class="modal">${html}</div>`;
+  back.addEventListener('click', e=>{ if(e.target===back) closeModal(); });
+  root.appendChild(back);
+}
+function closeModal(){ $('modal-root').innerHTML = ''; scanInput.focus(); }
+
+// ---- תשלום מפוצל ----
+$('checkout-btn').addEventListener('click', ()=>{
+  if(cart.length === 0){ toast('הסל ריק'); return; }
+  const rawTotal = cart.reduce((s,l)=> s + l.price*l.qty, 0);
+  let payments = [];
+  const methodLabels = {cash:'מזומן', credit:'אשראי', check:"צ'ק", store_credit:'הקפה/כרטסת'};
+
+  openModal(`
+    <h3>הוצאת חשבונית ותשלום</h3>
+    <div style="font-weight:700;font-size:18px;margin-bottom:10px;">סה"כ לתשלום: ${fmt(rawTotal)}</div>
+    <div class="field-row">
+      <div class="field"><label>אמצעי תשלום</label>
+        <select id="co-method"><option value="cash">מזומן</option><option value="credit">אשראי</option><option value="check">צ'ק</option><option value="store_credit">הקפה/כרטסת</option></select>
+      </div>
+      <div class="field"><label>סכום</label><input id="co-amount" type="number" step="0.01" value="${rawTotal.toFixed(2)}"></div>
+    </div>
+    <button class="ghost" id="co-add-payment">+ הוסף תשלום</button>
+    <div id="co-payments" style="margin:10px 0;"></div>
+    <div id="co-remaining" style="font-weight:600;font-size:13px;margin-bottom:8px;"></div>
+    <div class="err" id="co-err"></div>
+    <div class="modal-actions">
+      <button class="primary" id="co-confirm">אישור והפקת מסמך</button>
+      <button class="ghost" id="co-cancel">ביטול</button>
+    </div>`);
+
+  function renderPayments(){
+    const box = $('co-payments');
+    if(payments.length===0){ box.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;">לא נוספו תשלומים עדיין</div>'; }
+    else box.innerHTML = payments.map((p,i)=> `<div class="pay-line"><span>${methodLabels[p.method]}: ${fmt(p.amount)}</span><button class="danger-link" data-rm="${i}">הסר</button></div>`).join('');
+    box.querySelectorAll('button[data-rm]').forEach(b=> b.addEventListener('click', ()=>{ payments.splice(+b.dataset.rm,1); renderPayments(); }));
+    const paid = payments.reduce((s,p)=>s+p.amount,0);
+    const remaining = rawTotal - paid;
+    const remBox = $('co-remaining');
+    if(remaining > 0.004){ remBox.textContent = 'נותר לתשלום: ' + fmt(remaining); remBox.style.color = 'var(--red)'; }
+    else if(remaining < -0.004){ remBox.textContent = 'עודף לחישוב: ' + fmt(-remaining); remBox.style.color = 'var(--amber)'; }
+    else { remBox.textContent = 'הסכום מכוסה במלואו'; remBox.style.color = 'var(--teal)'; }
+  }
+  renderPayments();
+
+  $('co-add-payment').addEventListener('click', ()=>{
+    const amount = parseFloat($('co-amount').value);
+    if(isNaN(amount) || amount <= 0) return;
+    payments.push({ method: $('co-method').value, amount });
+    const paid = payments.reduce((s,p)=>s+p.amount,0);
+    $('co-amount').value = Math.max(rawTotal - paid, 0).toFixed(2);
+    renderPayments();
+  });
+  $('co-cancel').addEventListener('click', closeModal);
+  $('co-confirm').addEventListener('click', async ()=>{
+    try{
+      const data = await api('/api/checkout', { method:'POST', body: JSON.stringify({ cart, payments }) });
+      if(data.change_due){
+        const parts = data.change_breakdown.map(b => `${b.denom>=20?'שטר':'מטבע'} ${b.denom} ₪ x${b.count}`).join(', ');
+        toast('עודף: ' + fmt(data.change_due) + ' — ' + parts);
+      }
+      cart = [];
+      renderCart();
+      loadProductGrid();
+      showReceipt(data.sale);
+    }catch(err){
+      $('co-err').textContent = err.message;
+      $('co-err').style.display = 'block';
+    }
+  });
+});
+
+function showReceipt(sale){
+  const rows = sale.items.map(i => `<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td>${fmt(i.price*i.qty)}</td></tr>`).join('');
+  openModal(`
+    <h3>מסמך מס' ${sale.invoice_no} הופק בהצלחה</h3>
+    <div style="font-size:13px;">
+      <div>${esc(sale.doc_type)}</div>
+      <table style="margin:10px 0;"><thead><tr><th>פריט</th><th>כמות</th><th>סכום</th></tr></thead><tbody>${rows}</tbody></table>
+      <div>לפני מע"מ: ${fmt(sale.subtotal)}</div>
+      <div>מע"מ (${sale.vat_rate}%): ${fmt(sale.vat_amount)}</div>
+      <div style="font-weight:700;">סה"כ: ${fmt(sale.total)}</div>
+    </div>
+    <div class="modal-actions"><button class="primary" id="rc-close">סגירה</button></div>`);
+  $('rc-close').addEventListener('click', closeModal);
+}
+
+// ---- מלאי ----
+async function loadInventory(){
+  const q = $('inv-search').value;
+  const products = await api('/api/products?q=' + encodeURIComponent(q));
+  const body = $('inv-body');
+  if(products.length===0){ body.innerHTML = '<tr><td colspan="8" class="empty">אין מוצרים</td></tr>'; return; }
+  body.innerHTML = products.map(p => `<tr>
+    <td>${esc(p.name)}</td><td>${esc(p.barcode||'')}</td><td class="num">${fmt(p.price)}</td>
+    <td class="num">${p.cost!=null?fmt(p.cost):''}</td><td class="num">${p.qty}</td><td class="num">${p.min_qty}</td>
+    <td>${esc(p.category)}</td>
+    <td><button class="link" data-edit="${p.id}">עריכה</button> <button class="danger-link" data-del="${p.id}">מחיקה</button></td>
+  </tr>`).join('');
+  body.querySelectorAll('button[data-edit]').forEach(b=> b.addEventListener('click', ()=> openProductModal(products.find(p=>p.id===b.dataset.edit))));
+  body.querySelectorAll('button[data-del]').forEach(b=> b.addEventListener('click', async ()=>{
+    if(!confirm('למחוק מוצר זה לצמיתות?')) return;
+    await api('/api/products/'+b.dataset.del, { method:'DELETE' });
+    loadInventory();
+  }));
+}
+$('inv-search').addEventListener('input', ()=> loadInventory());
+$('inv-new-btn').addEventListener('click', ()=> openProductModal(null));
+
+function openProductModal(product){
+  const p = product || {};
+  openModal(`
+    <h3>${product ? 'עריכת מוצר' : 'מוצר חדש'}</h3>
+    <div class="field"><label>שם המוצר</label><input id="m-name" value="${esc(p.name||'')}"></div>
+    <div class="field"><label>ברקוד (אופציונלי)</label>
+      <div style="display:flex;gap:6px;"><input id="m-barcode" value="${esc(p.barcode||'')}" style="flex:1;"><button class="ghost" id="m-gen" type="button">צור ברקוד</button></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>מחיר מכירה</label><input id="m-price" type="number" step="0.01" value="${p.price??''}"></div>
+      <div class="field"><label>מחיר עלות</label><input id="m-cost" type="number" step="0.01" value="${p.cost??''}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>כמות במלאי</label><input id="m-qty" type="number" value="${p.qty??''}"></div>
+      <div class="field"><label>סף מלאי נמוך</label><input id="m-min" type="number" value="${p.min_qty??3}"></div>
+    </div>
+    <div class="field"><label>קטגוריה</label><input id="m-cat" value="${esc(p.category||'כללי')}"></div>
+    <div class="err" id="m-err"></div>
+    <div class="modal-actions">
+      <button class="primary" id="m-save">שמירה</button>
+      <button class="ghost" id="m-cancel">ביטול</button>
+    </div>`);
+  $('m-cancel').addEventListener('click', closeModal);
+  $('m-gen').addEventListener('click', async ()=>{ const r = await api('/api/products/generate-barcode'); $('m-barcode').value = r.barcode; });
+  $('m-save').addEventListener('click', async ()=>{
+    try{
+      await api('/api/products', { method:'POST', body: JSON.stringify({
+        id: p.id, name: $('m-name').value.trim(), barcode: $('m-barcode').value.trim(),
+        price: $('m-price').value, cost: $('m-cost').value, qty: $('m-qty').value,
+        min_qty: $('m-min').value, category: $('m-cat').value.trim(),
+      })});
+      closeModal();
+      loadInventory();
+    }catch(err){
+      $('m-err').textContent = err.message; $('m-err').style.display='block';
+    }
+  });
+}
+
+// ---- דוחות ----
+async function loadReports(){
+  const [today, low, sales] = await Promise.all([
+    api('/api/reports/today'), api('/api/reports/low-stock'), api('/api/sales?limit=30'),
+  ]);
+  $('rep-total').textContent = fmt(today.total);
+  $('rep-count').textContent = today.count;
+  $('rep-low-count').textContent = low.length;
+  $('rep-low-body').innerHTML = low.length ? low.map(p => `<tr><td>${esc(p.name)}</td><td class="num">${p.qty}</td><td class="num">${p.min_qty}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="empty">אין מוצרים במלאי נמוך</td></tr>';
+
+  const statusLabels = {ok:'תקינה', voided:'זוכתה במלואה', partial_refund:'זוכתה חלקית'};
+  const statusClass = {ok:'ok', voided:'voided', partial_refund:'partial_refund'};
+  $('rep-sales-body').innerHTML = sales.length ? sales.map(s => {
+    const t = new Date(s.created_at);
+    const time = t.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+    const canRefund = s.status !== 'voided';
+    return `<tr><td class="num">${s.invoice_no}</td><td>${time}</td><td>${esc(s.doc_type)}</td><td class="num">${fmt(s.total)}</td>
+      <td><span class="status-pill ${statusClass[s.status]}">${statusLabels[s.status]||s.status}</span></td>
+      <td>${canRefund ? `<button class="danger-link" data-refund="${s.id}">זיכוי</button>` : ''}</td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty">אין מכירות עדיין</td></tr>';
+
+  document.querySelectorAll('button[data-refund]').forEach(b=> b.addEventListener('click', ()=> openRefundModal(b.dataset.refund)));
+}
+
+async function openRefundModal(saleId){
+  const sale = await api('/api/sales/' + saleId);
+  const returnable = sale.items.filter(i => i.qty - i.returned_qty > 0);
+  if(returnable.length === 0){ toast('כל הפריטים כבר זוכו'); return; }
+  openModal(`
+    <h3>זיכוי חשבונית מס' ${sale.invoice_no}</h3>
+    ${returnable.map(i => {
+      const max = i.qty - i.returned_qty;
+      return `<div class="pay-line"><span>${esc(i.name)} (נותרו ${max})</span><input type="number" class="rf-qty" data-id="${i.id}" min="0" max="${max}" value="${max}" style="width:64px;"></div>`;
+    }).join('')}
+    <div class="err" id="rf-err"></div>
+    <div class="modal-actions">
+      <button class="primary" id="rf-confirm">אישור זיכוי</button>
+      <button class="ghost" id="rf-cancel">ביטול</button>
+    </div>`);
+  $('rf-cancel').addEventListener('click', closeModal);
+  $('rf-confirm').addEventListener('click', async ()=>{
+    const items = Array.from(document.querySelectorAll('.rf-qty'))
+      .map(inp => ({ sale_item_id: inp.dataset.id, qty: parseFloat(inp.value)||0 }))
+      .filter(x => x.qty > 0);
+    if(items.length === 0){ $('rf-err').textContent = 'יש לבחור לפחות פריט אחד'; $('rf-err').style.display='block'; return; }
+    try{
+      const res = await api('/api/sales/'+saleId+'/refund', { method:'POST', body: JSON.stringify({ items }) });
+      toast('הזיכוי בוצע — ' + fmt(res.refund_total));
+      closeModal();
+      loadReports();
+    }catch(err){
+      $('rf-err').textContent = err.message; $('rf-err').style.display='block';
+    }
+  });
+}
+
+// ---- הגדרות ----
+async function loadSettings(){
+  const s = await api('/api/settings');
+  $('s-name').value = s.business_name || '';
+  $('s-vat').value = s.vat_rate || 17;
+}
+$('s-save').addEventListener('click', async ()=>{
+  try{
+    await api('/api/settings', { method:'POST', body: JSON.stringify({ business_name: $('s-name').value, vat_rate: $('s-vat').value }) });
+    toast('ההגדרות נשמרו');
+    $('s-err').style.display = 'none';
+  }catch(err){
+    $('s-err').textContent = err.message; $('s-err').style.display='block';
+  }
+});
+
+// ---- טעינה ראשונית ----
+loadProductGrid();
+</script>
+</body>
+</html>
