@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ארנט - קופה ומלאי לחנויות</title>
+<style>
+  :root{
+    --bg:#F4F5F3; --surface:#FFFFFF; --ink:#16211C; --ink-soft:#5B655E; --line:#DBDED6;
+    --teal:#0F5C48; --teal-deep:#0A3F32; --teal-tint:#E1F0EA;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Arial,Heebo,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;}
+  h1{font-size:56px;margin:0 0 6px;color:var(--teal-deep);letter-spacing:-1px;}
+  .sub{color:var(--ink-soft);font-size:16px;margin:0 0 40px;max-width:440px;}
+  .btns{display:flex;flex-direction:column;gap:12px;width:280px;}
+  .btn{display:block;padding:16px;border-radius:10px;font-size:17px;font-weight:700;text-decoration:none;}
+  .primary{background:var(--teal);color:#fff;}
+  .primary:hover{background:var(--teal-deep);}
+  .ghost{background:var(--surface);color:var(--teal-deep);border:1px solid var(--line);}
+  .ghost:hover{border-color:var(--teal);}
+  .features{display:flex;gap:26px;margin-top:56px;flex-wrap:wrap;justify-content:center;max-width:560px;}
+  .feature{font-size:13px;color:var(--ink-soft);width:150px;}
+  .feature b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px;}
+</style>
+</head>
+<body>
+  <h1>ארנט</h1>
+  <p class="sub">מערכת קופה רושמת וניהול מלאי לחנויות - עמדת מכירה, מלאי, משמרות ודוחות, הכל במקום אחד.</p>
+  <div class="btns">
+    <a href="/signup" class="btn primary">פתיחת חשבון לחנות שלי</a>
+    <a href="/login" class="btn ghost">כניסה לחשבון קיים</a>
+  </div>
+  <div class="features">
+    <div class="feature"><b>עמדת מכירה</b>סריקת ברקוד, תשלום מפוצל, חישוב עודף</div>
+    <div class="feature"><b>ניהול מלאי</b>מעקב כמויות והתראות מלאי נמוך</div>
+    <div class="feature"><b>דוחות</b>מכירות, רווחיות ומשמרות קופה</div>
+  </div>
+</body>
+</html>

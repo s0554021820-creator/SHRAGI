@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול פלטפורמה | ארנט</title>
+<style>
+  :root{
+    --bg:#F4F5F3; --surface:#FFFFFF; --ink:#16211C; --ink-soft:#5B655E; --line:#DBDED6;
+    --teal:#0F5C48; --teal-deep:#0A3F32; --red:#B23A2E; --red-tint:#FBE7E4;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Arial,Heebo,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:32px;width:340px;max-width:90vw;}
+  h1{font-size:18px;margin:0 0 4px;text-align:center;}
+  .sub{color:var(--ink-soft);font-size:13px;text-align:center;margin:0 0 22px;}
+  input{width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:7px;padding:10px 12px;margin-bottom:14px;}
+  button{width:100%;background:var(--teal);color:#fff;border:none;border-radius:7px;padding:11px;font-weight:600;font-size:14px;cursor:pointer;}
+  .error{background:var(--red-tint);color:var(--red);border-radius:7px;padding:10px 12px;font-size:13px;margin-bottom:14px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>ניהול פלטפורמה</h1>
+    <p class="sub">גישה לבעל המערכת בלבד - הזינו את המפתח שהודפס בלוגים של השרת בהפעלה הראשונה</p>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="POST">
+      <input name="key" type="password" placeholder="מפתח ניהול" autofocus>
+      <button type="submit">כניסה</button>
+    </form>
+  </div>
+</body>
+</html>
